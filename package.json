@@ -6,6 +6,8 @@
   "dependencies": {
     "mongoose": "3.6.13"
     , "moment": "2.1.0"
+    , "pwd": "0.0.2"
+    , "coffee-script": "1.5.0"
   },
   "devDependencies": {
     "should": "1.2.2"
@@ -13,7 +15,6 @@
     , "mocha": "1.12.1"
     , "async": "0.2.5"
     , "pow-mongoose-fixtures": "git://github.com/powmedia/mongoose-fixtures.git#08c18a87b83384030457c4c15b19fd4cdaccf311"
-    , "coffee-script": "1.5.0"
     , "config": "0.4.25"
   },
   "keywords": [

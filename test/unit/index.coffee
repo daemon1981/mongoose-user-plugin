@@ -1,4 +1,4 @@
-require './bootstrap.coffee'
+require '../bootstrap.coffee'
 
 assert       = require 'assert'
 should       = require 'should'
@@ -6,7 +6,7 @@ async        = require 'async'
 mongoose     = require 'mongoose'
 fixtures     = require 'pow-mongoose-fixtures'
 
-User         = require "./models/user"
+User         = require "../models/user"
 
 describe "User", ->
   beforeEach (done) ->
