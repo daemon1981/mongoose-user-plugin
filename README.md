@@ -1,28 +1,40 @@
-# mongoose-rattle
+# mongoose-user-plugin [![Build Status](https://secure.travis-ci.org/daemon1981/mongoose-user-plugin.png)](https://travis-ci.org/daemon1981/mongoose-user-plugin)
 
 ## Description
 
-Add social interactions to document
+Add common user fonctionnality to document
 
-## Setup
-
-### Installation
+## Installation
 
 ```
-npm install -g coffee-script
-npm install -g mocha
-npm install
-bower install
+$ npm install mongoose-user-plugin
 ```
 
-## Tests
+## Overview
 
-launch unit tests:
+### Add plugin to a schema
+
 ```
-make test
+var mongoose           = require('mongoose');
+var MongooseUserPlugin = require('mongoose-user-plugin');
+
+var UserSchema = new mongoose.Schema();
+
+UserSchema.plugin(MongooseUserPlugin);
+
+UserSchema.add({
+  'myPersonalField': String
+});
+
+var User = mongoose.model("User", UserSchema);
+
+module.exports = User;
 ```
 
-launch unit tests with an other reporter:
-```
-make test REPORTER=spec
-```
+### Specifications
+
+Please see the [specifications here](https://github.com/daemon1981/mongoose-user-plugin/blob/master/test-unit.md)
+
+### Projects using mongoose-user-plugin
+
+ - [Workbook](https://github.com/eleven-labs/Workbook)

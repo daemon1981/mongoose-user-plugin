@@ -1,6 +1,6 @@
 {
   "name": "mongoose-user-plugin",
-  "description": "Add social interactions to mongoose schema",
+  "description": "Add common user fonctionnality to document",
   "version": "0.0.1",
   "author": "Damien Saillard",
   "dependencies": {
