@@ -7,7 +7,6 @@
     "mongoose": "3.6.13"
     , "moment": "2.1.0"
     , "pwd": "0.0.2"
-    , "coffee-script": "1.5.0"
   },
   "devDependencies": {
     "should": "1.2.2"
@@ -16,12 +15,19 @@
     , "async": "0.2.5"
     , "pow-mongoose-fixtures": "git://github.com/powmedia/mongoose-fixtures.git#08c18a87b83384030457c4c15b19fd4cdaccf311"
     , "config": "0.4.25"
+    , "coffee-script": "1.5.0"
   },
   "keywords": [
     "nodeJs"
     , "MongooseJs"
   ],
-  "repository": "git@github.com:daemon1981/mongoose-rattle-plugin.git",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:daemon1981/mongoose-user-plugin.git"
+  },
+  "engines": {
+    "node": ">0.8"
+  },
   "main": "lib/index.js",
   "scripts": {
     "test": "make test",
