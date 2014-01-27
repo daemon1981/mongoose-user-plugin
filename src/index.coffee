@@ -7,10 +7,14 @@ Schema   = mongoose.Schema
 
 module.exports = userPlugin = (schema, options) ->
 
+  emailMatch = /@/
+  if (options && options.emailMatch)
+    emailMatch = options.emailMatch
+
   schema.add
     firstName:       String
     lastName:        String
-    email:           type: String, required: true, unique: true, match: /@/
+    email:           type: String, required: true, unique: true, match: emailMatch
     salt:            type: String
     picture:         String
     passwordHash:    String

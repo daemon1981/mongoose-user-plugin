@@ -6,18 +6,20 @@ async        = require 'async'
 mongoose     = require 'mongoose'
 fixtures     = require 'pow-mongoose-fixtures'
 
-User         = require "../models/user"
+UserPlugin = require '../../src/index'
+User = mongoose.model "User", (new mongoose.Schema()).plugin UserPlugin
+UserOtherEmailMatch = mongoose.model "UserOtherEmailMatch", (new mongoose.Schema()).plugin UserPlugin, emailMatch: /@domain.com/
 
 describe "User", ->
   beforeEach (done) ->
     fixtures.load {User: []}, mongoose.connection, done
 
-  describe "When signing up 'signup()'", ->
-    it "should create a user and set validated to false", (done) ->
-      email = 'toto@toto.com'
-      User.signup email, 'passwd', 'fr', (err) ->
+  describe "#signup", ->
+    email = 'toto@toto.com'
+    checkSignupWorks = (Model, email, done) ->
+      Model.signup email, 'passwd', 'fr', (err) ->
         should.not.exist(err)
-        User.find {}, (err, users) ->
+        Model.find {}, (err, users) ->
           users.length.should.equal(1)
           users[0].email.should.equal(email)
           should.exist(users[0].salt)
@@ -25,12 +27,20 @@ describe "User", ->
           users[0].validated.should.equal(false)
           should.exist(users[0].validationKey)
           done()
-    it "should not be possible to create a user with the same email", (done) ->
-      email = 'toto@toto.com'
-      User.signup email, 'passwd', 'fr', (err) ->
-        User.signup email, 'other-passwd', 'fr', (err) ->
+    checkSignupFails = (Model, email, done) ->
+      Model.signup email, 'passwd', 'fr', (err) ->
+        Model.signup email, 'other-passwd', 'fr', (err) ->
           should.exist(err)
           done()
+
+    it "should create a user and set validated to false", (done) ->
+      checkSignupWorks(User, email, done)
+
+    it "should fails and set validated to false", (done) ->
+      checkSignupFails(UserOtherEmailMatch, email, done)
+
+    it "should fails with the same email", (done) ->
+      checkSignupFails(User, email, done)
 
   describe "When validating an account 'accountValidator()'", ->
     it "should valid account", (done) ->
