@@ -8,11 +8,17 @@ fixtures     = require 'pow-mongoose-fixtures'
 
 UserPlugin = require '../../src/index'
 User = mongoose.model "User", (new mongoose.Schema()).plugin UserPlugin
-UserOtherEmailMatch = mongoose.model "UserOtherEmailMatch", (new mongoose.Schema()).plugin UserPlugin, emailMatch: /@domain.com/
+UserOtherEmailMatchSchema = new mongoose.Schema()
+# UserOtherEmailMatchSchema.plugin UserPlugin, emailMatch: /@domain.com/
+UserOtherEmailMatchSchema.plugin UserPlugin
+UserOtherEmailMatchSchema.add
+  email:       type: String, required: true, unique: true, match: /@domain.com/
+UserOtherEmailMatch = mongoose.model "UserOtherEmailMatch", UserOtherEmailMatchSchema
+
 
 describe "User", ->
   beforeEach (done) ->
-    fixtures.load {User: []}, mongoose.connection, done
+    fixtures.load {User: [], UserOtherEmailMatch: []}, mongoose.connection, done
 
   describe "#signup", ->
     email = 'toto@toto.com'
@@ -29,18 +35,19 @@ describe "User", ->
           done()
     checkSignupFails = (Model, email, done) ->
       Model.signup email, 'passwd', 'fr', (err) ->
-        Model.signup email, 'other-passwd', 'fr', (err) ->
-          should.exist(err)
-          done()
+        should.exist(err)
+        done()
 
     it "should create a user and set validated to false", (done) ->
       checkSignupWorks(User, email, done)
 
-    it "should fails and set validated to false", (done) ->
-      checkSignupFails(UserOtherEmailMatch, email, done)
+    it "should fails and set validated to false when email not matching", (done) ->
+      checkSignupFails(UserOtherEmailMatch, 'titi@toto.com', done)
 
     it "should fails with the same email", (done) ->
-      checkSignupFails(User, email, done)
+      checkSignupWorks User, email, (err) ->
+        should.not.exist(err)
+        checkSignupFails(User, email, done)
 
   describe "When validating an account 'accountValidator()'", ->
     it "should valid account", (done) ->

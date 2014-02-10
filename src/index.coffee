@@ -6,15 +6,10 @@ config   = require 'config'
 Schema   = mongoose.Schema
 
 module.exports = userPlugin = (schema, options) ->
-
-  emailMatch = /@/
-  if (options && options.emailMatch)
-    emailMatch = options.emailMatch
-
   schema.add
     firstName:       String
     lastName:        String
-    email:           type: String, required: true, unique: true, match: emailMatch
+    email:           type: String, required: true, unique: true, match: /@/
     salt:            type: String
     picture:         String
     passwordHash:    String
