@@ -4,13 +4,12 @@ assert       = require 'assert'
 should       = require 'should'
 async        = require 'async'
 mongoose     = require 'mongoose'
-fixtures     = require 'pow-mongoose-fixtures'
 
 UserPlugin = require '../../src/index'
-User = mongoose.model "User", (new mongoose.Schema()).plugin UserPlugin
+User = mongoose.model "User", (new mongoose.Schema()).plugin UserPlugin, languages: ['en', 'fr']
+
 UserOtherEmailMatchSchema = new mongoose.Schema()
-# UserOtherEmailMatchSchema.plugin UserPlugin, emailMatch: /@domain.com/
-UserOtherEmailMatchSchema.plugin UserPlugin
+UserOtherEmailMatchSchema.plugin UserPlugin, languages: ['en', 'fr']
 UserOtherEmailMatchSchema.add
   email:       type: String, required: true, unique: true, match: /@domain.com/
 UserOtherEmailMatch = mongoose.model "UserOtherEmailMatch", UserOtherEmailMatchSchema
@@ -18,7 +17,11 @@ UserOtherEmailMatch = mongoose.model "UserOtherEmailMatch", UserOtherEmailMatchS
 
 describe "User", ->
   beforeEach (done) ->
-    fixtures.load {User: [], UserOtherEmailMatch: []}, mongoose.connection, done
+    async.series([(next) ->
+        User.remove(next)
+      , (next) ->
+        UserOtherEmailMatch.remove(next)
+    ], done);
 
   describe "#signup", ->
     email = 'toto@toto.com'

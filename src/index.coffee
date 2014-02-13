@@ -1,11 +1,13 @@
 mongoose = require 'mongoose'
 moment   = require 'moment'
 pwd      = require 'pwd'
-config   = require 'config'
 
 Schema   = mongoose.Schema
 
 module.exports = userPlugin = (schema, options) ->
+  options = {} if (!options)
+  options.languages = ['en'] if (!options.languages)
+
   schema.add
     firstName:       String
     lastName:        String
@@ -13,7 +15,7 @@ module.exports = userPlugin = (schema, options) ->
     salt:            type: String
     picture:         String
     passwordHash:    String
-    language:        type: String, required: true, enum: config.languages
+    language:        type: String, required: true, enum: options.languages
     validated:       type: Boolean, default: false
     validationKey:   type: String
     facebook:
