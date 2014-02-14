@@ -15,7 +15,7 @@ UserOtherEmailMatchSchema.add
 UserOtherEmailMatch = mongoose.model "UserOtherEmailMatch", UserOtherEmailMatchSchema
 
 
-describe "User", ->
+describe "UserPlugin", ->
   beforeEach (done) ->
     async.series([(next) ->
         User.remove(next)
@@ -23,7 +23,7 @@ describe "User", ->
         UserOtherEmailMatch.remove(next)
     ], done);
 
-  describe "#signup", ->
+  describe "document.signup(email, password, language, callback)", ->
     email = 'toto@toto.com'
     checkSignupWorks = (Model, email, done) ->
       Model.signup email, 'passwd', 'fr', (err) ->
@@ -41,18 +41,18 @@ describe "User", ->
         should.exist(err)
         done()
 
-    it "should create a user and set validated to false", (done) ->
+    it "create a user and set validated to false", (done) ->
       checkSignupWorks(User, email, done)
 
-    it "should fails and set validated to false when email not matching", (done) ->
+    it "fails and set validated to false when email not matching", (done) ->
       checkSignupFails(UserOtherEmailMatch, 'titi@toto.com', done)
 
-    it "should fails with the same email", (done) ->
+    it "fails with the same email", (done) ->
       checkSignupWorks User, email, (err) ->
         should.not.exist(err)
         checkSignupFails(User, email, done)
 
-  describe "When validating an account 'accountValidator()'", ->
+  describe "document.accountValidator(validationKey, callback)", ->
     it "should valid account", (done) ->
       email = 'toto@toto.com'
       userTest  = {}
@@ -68,12 +68,12 @@ describe "User", ->
           should.not.exist(user.validationKey)
           done()
       ], done
-    it "should fails if validationKey doesn't exist", (done) ->
+    it "fails if validationKey doesn't exist", (done) ->
       User.accountValidator 'key-not-exists', (err, user) ->
         should.exist(err)
         done()
 
-  describe "When checking user password is valid 'isValidUserPassword()'", ->
+  describe "document.isValidUserPassword(email, password, callback)", ->
     passwd = 'passwd'
     email = 'toto@toto.com'
     user = {}
@@ -81,36 +81,33 @@ describe "User", ->
       User.signup email, passwd, 'fr', (err, newUser) ->
         user = newUser
         done()
-    describe "User not validated", ->
-      describe "Password is correct", ->
-        it "should not valid user password", (done) ->
-          User.isValidUserPassword email, passwd, (err, data, msg) ->
-            should.not.exist(err)
-            should.exist(msg)
-            assert.equal false, data
-            assert.deepEqual msg, message: 'Account not validated.'
-            done()
-    describe "User validated", ->
+    describe "when user account is not validated", ->
+      it "not validating user password even if password is correct", (done) ->
+        User.isValidUserPassword email, passwd, (err, data, msg) ->
+          should.not.exist(err)
+          should.exist(msg)
+          assert.equal false, data
+          assert.deepEqual msg, message: 'Account not validated.'
+          done()
+    describe "when user account is validated", ->
       beforeEach (done) ->
         user.validated = true
         user.save done
-      describe "Password is correct", ->
-        it "should valid user password", (done) ->
-          User.isValidUserPassword email, passwd, (err, data, msg) ->
-            should.not.exist(err)
-            should.not.exist(msg)
-            assert.equal user.email, data.email
-            done()
-      describe "Password is not correct", ->
-        it "should not valid user password", (done) ->
-          User.isValidUserPassword email, 'badpasswd', (err, data, msg) ->
-            should.not.exist(err)
-            should.exist(msg)
-            assert.equal false, data
-            assert.deepEqual msg, message: 'Incorrect password.'
-            done()
+      it "validating user password if password is correct", (done) ->
+        User.isValidUserPassword email, passwd, (err, data, msg) ->
+          should.not.exist(err)
+          should.not.exist(msg)
+          assert.equal user.email, data.email
+          done()
+      it "not validating user password if password is not correct", (done) ->
+        User.isValidUserPassword email, 'badpasswd', (err, data, msg) ->
+          should.not.exist(err)
+          should.exist(msg)
+          assert.equal false, data
+          assert.deepEqual msg, message: 'Incorrect password.'
+          done()
 
-  describe "When requesting for password reset 'requestResetPassword()'", ->
+  describe "document.requestResetPassword(callback)", ->
     passwd = 'passwd'
     email = 'toto@toto.com'
     user = {}
@@ -118,38 +115,36 @@ describe "User", ->
       User.signup email, passwd, 'fr', (err, newUser) ->
         user = newUser
         done()
-    it "should set required fields for forgot password process", (done) ->
+    it "set required fields for forgot password process", (done) ->
       user.requestResetPassword (err, modifedUser) ->
         should.not.exist(err)
         should.exist(modifedUser.regeneratePasswordKey)
         should.exist(modifedUser.regeneratePasswordDate)
         done()
 
-  describe "When finding facebook user 'findOrCreateFaceBookUser()'", ->
+  describe "document.findOrCreateFaceBookUser(profile, done)", ->
     email = 'toto@toto.com'
     profile =
       id: '4ds5fd6'
       emails: [value: email]
       displayName: 'Toto Dupond'
       language: 'fr'
-    describe "When user doesn't exists", (done) ->
-      it "should create facebook user", (done) ->
+    it "create facebook user when user doesn't exists", (done) ->
+      User.findOrCreateFaceBookUser profile, (err, user) ->
+        should.not.exist(err)
+        User.find {}, (err, users) ->
+          users.length.should.equal(1)
+          users[0].email.should.equal(email)
+          users[0].validated.should.equal(true)
+          done()
+    it "retrieve facebook user when user exists", (done) ->
+      User.findOrCreateFaceBookUser profile, (err, user) ->
+        should.not.exist(err)
+        userId = user._id
         User.findOrCreateFaceBookUser profile, (err, user) ->
           should.not.exist(err)
+          assert.deepEqual userId, user._id
           User.find {}, (err, users) ->
             users.length.should.equal(1)
             users[0].email.should.equal(email)
-            users[0].validated.should.equal(true)
             done()
-    describe "When user exists", (done) ->
-      it "should retrieve facebook user", (done) ->
-        User.findOrCreateFaceBookUser profile, (err, user) ->
-          should.not.exist(err)
-          userId = user._id
-          User.findOrCreateFaceBookUser profile, (err, user) ->
-            should.not.exist(err)
-            assert.deepEqual userId, user._id
-            User.find {}, (err, users) ->
-              users.length.should.equal(1)
-              users[0].email.should.equal(email)
-              done()

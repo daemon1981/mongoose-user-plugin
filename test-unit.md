@@ -1,58 +1,41 @@
-Cannot write runtime.json file Error: ENOENT, no such file or directory '/var/local/webroot/git-clones/mongoose-user-plugin/config/runtime.json'
 # TOC
-   - [User](#user)
-     - [When signing up 'signup()'](#user-when-signing-up-signup)
-     - [When validating an account 'accountValidator()'](#user-when-validating-an-account-accountvalidator)
-     - [When checking user password is valid 'isValidUserPassword()'](#user-when-checking-user-password-is-valid-isvaliduserpassword)
-       - [User not validated](#user-when-checking-user-password-is-valid-isvaliduserpassword-user-not-validated)
-         - [Password is correct](#user-when-checking-user-password-is-valid-isvaliduserpassword-user-not-validated-password-is-correct)
-       - [User validated](#user-when-checking-user-password-is-valid-isvaliduserpassword-user-validated)
-         - [Password is correct](#user-when-checking-user-password-is-valid-isvaliduserpassword-user-validated-password-is-correct)
-         - [Password is not correct](#user-when-checking-user-password-is-valid-isvaliduserpassword-user-validated-password-is-not-correct)
-     - [When requesting for password reset 'requestResetPassword()'](#user-when-requesting-for-password-reset-requestresetpassword)
-     - [When finding facebook user 'findOrCreateFaceBookUser()'](#user-when-finding-facebook-user-findorcreatefacebookuser)
-       - [When user doesn't exists](#user-when-finding-facebook-user-findorcreatefacebookuser-when-user-doesnt-exists)
-       - [When user exists](#user-when-finding-facebook-user-findorcreatefacebookuser-when-user-exists)
+   - [UserPlugin](#userplugin)
+     - [document.signup(email, password, language, callback)](#userplugin-documentsignupemail-password-language-callback)
+     - [document.accountValidator(validationKey, callback)](#userplugin-documentaccountvalidatorvalidationkey-callback)
+     - [document.isValidUserPassword(email, password, callback)](#userplugin-documentisvaliduserpasswordemail-password-callback)
+       - [when user account is not validated](#userplugin-documentisvaliduserpasswordemail-password-callback-when-user-account-is-not-validated)
+       - [when user account is validated](#userplugin-documentisvaliduserpasswordemail-password-callback-when-user-account-is-validated)
+     - [document.requestResetPassword(callback)](#userplugin-documentrequestresetpasswordcallback)
+     - [document.findOrCreateFaceBookUser(profile, done)](#userplugin-documentfindorcreatefacebookuserprofile-done)
 <a name=""></a>
 
-<a name="user"></a>
-# User
-<a name="user-when-signing-up-signup"></a>
-## When signing up 'signup()'
-should create a user and set validated to false.
+<a name="userplugin"></a>
+# UserPlugin
+<a name="userplugin-documentsignupemail-password-language-callback"></a>
+## document.signup(email, password, language, callback)
+create a user and set validated to false.
 
 ```js
-var email;
-email = 'toto@toto.com';
-return User.signup(email, 'passwd', 'fr', function(err) {
+return checkSignupWorks(User, email, done);
+```
+
+fails and set validated to false when email not matching.
+
+```js
+return checkSignupFails(UserOtherEmailMatch, 'titi@toto.com', done);
+```
+
+fails with the same email.
+
+```js
+return checkSignupWorks(User, email, function(err) {
   should.not.exist(err);
-  return User.find({}, function(err, users) {
-    users.length.should.equal(1);
-    users[0].email.should.equal(email);
-    should.exist(users[0].salt);
-    should.exist(users[0].passwordHash);
-    users[0].validated.should.equal(false);
-    should.exist(users[0].validationKey);
-    return done();
-  });
+  return checkSignupFails(User, email, done);
 });
 ```
 
-should not be possible to create a user with the same email.
-
-```js
-var email;
-email = 'toto@toto.com';
-return User.signup(email, 'passwd', 'fr', function(err) {
-  return User.signup(email, 'other-passwd', 'fr', function(err) {
-    should.exist(err);
-    return done();
-  });
-});
-```
-
-<a name="user-when-validating-an-account-accountvalidator"></a>
-## When validating an account 'accountValidator()'
+<a name="userplugin-documentaccountvalidatorvalidationkey-callback"></a>
+## document.accountValidator(validationKey, callback)
 should valid account.
 
 ```js
@@ -79,7 +62,7 @@ return async.series([
 ], done);
 ```
 
-should fails if validationKey doesn't exist.
+fails if validationKey doesn't exist.
 
 ```js
 return User.accountValidator('key-not-exists', function(err, user) {
@@ -88,13 +71,11 @@ return User.accountValidator('key-not-exists', function(err, user) {
 });
 ```
 
-<a name="user-when-checking-user-password-is-valid-isvaliduserpassword"></a>
-## When checking user password is valid 'isValidUserPassword()'
-<a name="user-when-checking-user-password-is-valid-isvaliduserpassword-user-not-validated"></a>
-### User not validated
-<a name="user-when-checking-user-password-is-valid-isvaliduserpassword-user-not-validated-password-is-correct"></a>
-#### Password is correct
-should not valid user password.
+<a name="userplugin-documentisvaliduserpasswordemail-password-callback"></a>
+## document.isValidUserPassword(email, password, callback)
+<a name="userplugin-documentisvaliduserpasswordemail-password-callback-when-user-account-is-not-validated"></a>
+### when user account is not validated
+not validating user password even if password is correct.
 
 ```js
 return User.isValidUserPassword(email, passwd, function(err, data, msg) {
@@ -108,11 +89,9 @@ return User.isValidUserPassword(email, passwd, function(err, data, msg) {
 });
 ```
 
-<a name="user-when-checking-user-password-is-valid-isvaliduserpassword-user-validated"></a>
-### User validated
-<a name="user-when-checking-user-password-is-valid-isvaliduserpassword-user-validated-password-is-correct"></a>
-#### Password is correct
-should valid user password.
+<a name="userplugin-documentisvaliduserpasswordemail-password-callback-when-user-account-is-validated"></a>
+### when user account is validated
+validating user password if password is correct.
 
 ```js
 return User.isValidUserPassword(email, passwd, function(err, data, msg) {
@@ -123,9 +102,7 @@ return User.isValidUserPassword(email, passwd, function(err, data, msg) {
 });
 ```
 
-<a name="user-when-checking-user-password-is-valid-isvaliduserpassword-user-validated-password-is-not-correct"></a>
-#### Password is not correct
-should not valid user password.
+not validating user password if password is not correct.
 
 ```js
 return User.isValidUserPassword(email, 'badpasswd', function(err, data, msg) {
@@ -139,9 +116,9 @@ return User.isValidUserPassword(email, 'badpasswd', function(err, data, msg) {
 });
 ```
 
-<a name="user-when-requesting-for-password-reset-requestresetpassword"></a>
-## When requesting for password reset 'requestResetPassword()'
-should set required fields for forgot password process.
+<a name="userplugin-documentrequestresetpasswordcallback"></a>
+## document.requestResetPassword(callback)
+set required fields for forgot password process.
 
 ```js
 return user.requestResetPassword(function(err, modifedUser) {
@@ -152,11 +129,9 @@ return user.requestResetPassword(function(err, modifedUser) {
 });
 ```
 
-<a name="user-when-finding-facebook-user-findorcreatefacebookuser"></a>
-## When finding facebook user 'findOrCreateFaceBookUser()'
-<a name="user-when-finding-facebook-user-findorcreatefacebookuser-when-user-doesnt-exists"></a>
-### When user doesn't exists
-should create facebook user.
+<a name="userplugin-documentfindorcreatefacebookuserprofile-done"></a>
+## document.findOrCreateFaceBookUser(profile, done)
+create facebook user when user doesn't exists.
 
 ```js
 return User.findOrCreateFaceBookUser(profile, function(err, user) {
@@ -170,9 +145,7 @@ return User.findOrCreateFaceBookUser(profile, function(err, user) {
 });
 ```
 
-<a name="user-when-finding-facebook-user-findorcreatefacebookuser-when-user-exists"></a>
-### When user exists
-should retrieve facebook user.
+retrieve facebook user when user exists.
 
 ```js
 return User.findOrCreateFaceBookUser(profile, function(err, user) {
