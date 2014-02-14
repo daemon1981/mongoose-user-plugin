@@ -1,6 +1,6 @@
 {
   "name": "mongoose-user-plugin",
-  "description": "Add common user fonctionnality to document",
+  "description": "Add common user fonctionnality to document for signin, login and more",
   "version": "0.0.1",
   "author": "Damien Saillard",
   "dependencies": {

@@ -2,7 +2,15 @@
 
 ## Description
 
-Add common user fonctionnality to document
+Add common user fonctionnality to document for signin, login and more
+
+This provide to your user schema:
+ - signing up with an hash and salt password
+ - validate an account
+ - checking login
+ - add facebook user to the profile
+ - check password complexity
+ - process for reseting password
 
 ## Installation
 
