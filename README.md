@@ -46,3 +46,4 @@ Please see the [specifications here](https://github.com/daemon1981/mongoose-user
 ### Projects using mongoose-user-plugin
 
  - [Workbook](https://github.com/eleven-labs/Workbook)
+ - [Express Application Seed](https://github.com/daemon1981/express-application-seed)
