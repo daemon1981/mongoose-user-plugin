@@ -14,7 +14,7 @@ This provide to your user schema:
 
 ## Installation
 
-```
+```bash
 $ npm install mongoose-user-plugin
 ```
 
@@ -22,7 +22,7 @@ $ npm install mongoose-user-plugin
 
 ### Add plugin to a schema
 
-```
+```javascript
 var mongoose           = require('mongoose');
 var MongooseUserPlugin = require('mongoose-user-plugin');
 
