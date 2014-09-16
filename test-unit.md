@@ -8,7 +8,7 @@
      - [document.requestResetPassword(callback)](#userplugin-documentrequestresetpasswordcallback)
      - [document.findOrCreateFaceBookUser(profile, done)](#userplugin-documentfindorcreatefacebookuserprofile-done)
 <a name=""></a>
-
+ 
 <a name="userplugin"></a>
 # UserPlugin
 <a name="userplugin-documentsignupemail-password-language-callback"></a>
@@ -163,3 +163,4 @@ return User.findOrCreateFaceBookUser(profile, function(err, user) {
   });
 });
 ```
+
